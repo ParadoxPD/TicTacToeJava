@@ -5,8 +5,9 @@ class Minimax {
     int[][] winningLine = new int[8][3];
 
     Minimax(String x, String y) {
-        player = y;
         opponent = x;
+        player = y;
+
         init();
     }
 
@@ -121,4 +122,9 @@ class Minimax {
         }
         return false;
     }
+
+    // public static void main(String[] args) {
+    // String[] a = { "X", "", "", "", "", "", "", "", "" };
+    // System.out.println(new Minimax("O", "X").findBestMove(a));
+    // }
 }
