@@ -2,6 +2,11 @@ import java.awt.*;
 import java.awt.event.*;
 
 import javax.swing.*;
+//add next move promt to user
+//add choose player function
+//add ????
+//Refactor in next life ...
+// Documentation will be done in hell...
 
 class TicTacToe extends Minimax {
 
@@ -14,10 +19,10 @@ class TicTacToe extends Minimax {
     private JRadioButton rb1;
     private JRadioButton rb2;
     private ButtonGroup bg;
-    private Action act;
-    private Mouse mouse;
-    private String player;
-    private String computer;
+    private Actions act;
+
+    private String player = "X";
+    private String computer = "O";
     private boolean over;
     private String[] values = new String[9];
     int[][] winningLine = new int[8][3];
@@ -25,8 +30,7 @@ class TicTacToe extends Minimax {
     private Timer t;
 
     void initGame() {
-        player = "X";
-        computer = "O";
+
         over = false;
         for (int i = 0; i < values.length; i++) {
             values[i] = "";
@@ -48,6 +52,8 @@ class TicTacToe extends Minimax {
         winningLine[7][2] = 6;
     }
 
+    int[] winLine = new int[3];
+
     String checkStatus(String[] board) {
         String winner = "";
         for (int i = 0; i < winningLine.length; i++) {
@@ -56,6 +62,7 @@ class TicTacToe extends Minimax {
             if (board[line[0]].equals(board[line[1]]) && board[line[1]].equals(board[line[2]])
                     && !board[line[0]].equals("")) {
                 winner = board[line[0]];
+                winLine = line;
                 break;
             }
         }
@@ -88,16 +95,21 @@ class TicTacToe extends Minimax {
             t.stop();
             jl[12].setText("winner is " + s);
             for (int i = 0; i < values.length; i++) {
-                jl[i].removeMouseListener(mouse);
+                if (i == winLine[0] || i == winLine[1] || i == winLine[2]) {
+                    jl[i].setForeground(Color.GREEN);
+                }
+                jl[i].removeMouseListener(act);
             }
+            jl[11].setText("");
+
         } else if (!anyMoveLeft(values)) {
             over = true;
             t.stop();
             jl[12].setText("draw");
             for (int i = 0; i < values.length; i++) {
-                jl[i].removeMouseListener(mouse);
+                jl[i].removeMouseListener(act);
             }
-
+            jl[11].setText("");
         }
     }
 
@@ -105,9 +117,13 @@ class TicTacToe extends Minimax {
         initGame();
         for (int i = 0; i < values.length; i++) {
             jl[i].setText("");
-            jl[i].addMouseListener(mouse);
+            jl[i].setForeground(Color.WHITE);
+            jl[i].addMouseListener(act);
         }
+        jl[11].setText("");
         jl[12].setText("");
+        winLine = new int[3];
+
     }
 
     void gui() {
@@ -149,7 +165,7 @@ class TicTacToe extends Minimax {
 
         jl[10].setText("Current Player :-");
 
-        jl[11].setText("xxx");
+        jl[11].setText("");
 
         bg.add(rb1);
         bg.add(rb2);
@@ -157,7 +173,11 @@ class TicTacToe extends Minimax {
         for (JPanel j : jp) {
             j.setBackground(new Color(0x282C34));
         }
-
+        for (JLabel j : jl) {
+            j.setForeground(new java.awt.Color(255, 255, 255));
+        }
+        rb1.setForeground(new java.awt.Color(255, 255, 255));
+        rb2.setForeground(new java.awt.Color(255, 255, 255));
         f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         jp[2].setLayout(new AbsoluteLayout());
@@ -314,17 +334,19 @@ class TicTacToe extends Minimax {
 
         f.pack();
 
-        act = new Action();
-        mouse = new Mouse();
+        act = new Actions();
         for (int i = 0; i < values.length; i++) {
 
-            jl[i].addMouseListener(mouse);
+            jl[i].addMouseListener(act);
+            jl[i].addMouseMotionListener(act);
         }
         jb1.addActionListener(act);
+        rb1.addActionListener(act);
+        rb2.addActionListener(act);
 
     }
 
-    private class Action implements ActionListener {
+    private class Actions implements ActionListener, MouseListener, MouseMotionListener {
 
         public void actionPerformed(ActionEvent e) {
 
@@ -332,10 +354,21 @@ class TicTacToe extends Minimax {
                 reset();
             }
 
-        }
-    }
+            if (e.getSource() == rb1) {
+                player = "X";
+                computer = "O";
+                reset();
 
-    private class Mouse implements MouseListener {
+            }
+            if (e.getSource() == rb2) {
+
+                player = "O";
+                computer = "X";
+                reset();
+
+            }
+
+        }
 
         public void mouseClicked(MouseEvent e) {
 
@@ -358,8 +391,6 @@ class TicTacToe extends Minimax {
                         t.setRepeats(false);
                         t.start();
 
-                        // t.isRepeats();
-
                     }
 
                 }
@@ -378,9 +409,25 @@ class TicTacToe extends Minimax {
 
         }
 
+        public void mouseDragged(MouseEvent e) {
+        }
+
+        public void mouseMoved(MouseEvent e) {
+            for (int i = 0; i < 9; i++) {
+                if (e.getSource() == jl[i]) {
+                    jl[i].setBackground(new Color(40, 42, 54));
+                } else {
+                    jl[i].setBackground(new Color(60, 84, 108));
+                }
+            }
+        }
+
         void nextMove(int i, String current) {
+
             jl[i].setText(current);
             values[i] = current;
+            jl[11].setText(!current.equals(player) ? "Next Move is : " + "player" + " \'" + player + "\'"
+                    : "Next Move is : " + "computer" + " \'" + computer + "\'");
 
         }
 
